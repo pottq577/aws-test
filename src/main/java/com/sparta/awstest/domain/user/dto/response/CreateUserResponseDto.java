@@ -16,7 +16,7 @@ public class CreateUserResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
-    public static CreateUserResponseDto of(User user){
+    public static CreateUserResponseDto of(User user) {
         return new CreateUserResponseDto(
             user.getName(),
             user.getPassword(),

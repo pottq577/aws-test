@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    default User findByIdOrElseThrow(Long userId){
+    default User findByIdOrElseThrow(Long userId) {
         return findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
     }

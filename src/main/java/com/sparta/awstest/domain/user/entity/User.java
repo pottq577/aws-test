@@ -21,4 +21,8 @@ public class User extends BaseEntity {
 
     @Column
     private String password;
+
+    public static User from(String name, String password){
+        return new User(name, password);
+    }
 }

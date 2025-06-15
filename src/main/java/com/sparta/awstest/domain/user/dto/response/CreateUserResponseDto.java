@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateUserResponseDto {
 
+    private Long id;
     private String name;
     private String password;
     private LocalDateTime createdAt;
@@ -18,6 +19,7 @@ public class CreateUserResponseDto {
 
     public static CreateUserResponseDto of(User user) {
         return new CreateUserResponseDto(
+            user.getId(),
             user.getName(),
             user.getPassword(),
             user.getCreatedAt(),

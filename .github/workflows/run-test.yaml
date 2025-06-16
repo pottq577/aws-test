@@ -34,7 +34,7 @@ jobs:
           options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
 
       env:
-        database_local_url: localhost:3306/testdb
+        database_local_url: mysql:3306/testdb
         database_local_username: testuser
         database_local_password: testpass
 

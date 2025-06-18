@@ -44,16 +44,27 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "bash -s" << 'ENDSSH'
+            set -e  # 에러 발생 시 스크립트 즉시 종료
+            echo "✅ 서버에 접속했습니다. 배포를 시작합니다."
+          
             sudo systemctl stop nginx
+          
+            echo "🛑 기존 컨테이너 정리 중..."
             docker stop aws-test || true
             docker rm aws-test || true
+          
+            echo "📦 최신 이미지 Pull 중..."
             docker pull ${{ secrets.DOCKER_USERNAME }}/aws-test:latest
+          
+            echo "🚀 새 컨테이너 실행 중..."
             docker run -d \
-              -e database_local_url=${{ secrets.EC2_MYSQL_HOST }}/aws-test:latest \
-              -e database_local_username=root \
-              -e database_local_password=qwer1234 \
+              -e "database_local_url=${{ secrets.EC2_MYSQL_HOST }}/aws-test:latest" \
+              -e "database_local_username=root" \
+              -e "database_local_password=qwer1234" \
               -p 80:8080 \
               --name aws-test \
               ${{ secrets.DOCKER_USERNAME }}/aws-test:latest
-          EOF
+          
+            echo "✅ 배포 완료"
+          ENDSSH

@@ -35,6 +35,14 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Echo image uri
+        env:
+          REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        run: |
+          IMAGE_URI=$REGISTRY/$REPOSITORY:latest
+          echo "::notice::IMAGE_URI=$IMAGE_URI"
+
       - name: Build, tag, and Push image to ECR
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}

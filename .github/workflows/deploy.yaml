@@ -20,7 +20,11 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Gradle
-        run: ./gradlew clean build -x test # -x test: 테스트 하지 않음
+        run: ./gradlew clean build --no-build-cache -x test # -x test: 테스트 하지 않음
+
+      - name: Check JAR contents (for templates)
+        run: |
+          unzip -l build/libs/aws-test-0.0.1-SNAPSHOT.jar | grep templates
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

@@ -50,23 +50,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
-      - name: Download current task definition
-        run: |
-          aws ecs describe-task-definition --task-definition sparta-tigers-task \
-          --query "taskDefinition" > task-definition.json
-
-      - name: Replace image URI in task definition
-        run: |
-          export IMAGE_URI=${{ secrets.DOCKER_USERNAME }}/aws-test:latest
-          cat task-definition.json \
-          | jq '.containerDefinitions[0].image = env.IMAGE_URI' \
-          | jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' \
-          > new-task-definition.json
-
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: new-task-definition.json
+          task-definition: ecs-task-definition.json
           service: sparta-tigers-task-service
           cluster: sparta-tigers-cluster
           wait-for-service-stability: true

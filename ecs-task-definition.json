@@ -1,0 +1,36 @@
+{
+  "family": "sparta-tigers-task",
+  "networkMode": "bridge",
+  "containerDefinitions": [
+    {
+      "name": "sparta-tigers-container",
+      "image": "pottq577/aws-test:latest",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 8080
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "database_local_url",
+          "value": "10.0.16.115"
+        },
+        {
+          "name": "database_local_username",
+          "value": "root"
+        },
+        {
+          "name": "database_local_password",
+          "value": "qwer1234"
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "cpu": "256",
+  "memory": "512"
+}

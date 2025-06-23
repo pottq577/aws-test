@@ -69,5 +69,5 @@ jobs:
             --query "taskDefinition.revision" --output text)
           aws ecs update-service \
             --cluster sparta-tigers-cluster \
-            --service sparta-tigers-service \
+            --service sparta-tigers-task-service \
             --task-definition sparta-tigers-task:$NEW_REVISION

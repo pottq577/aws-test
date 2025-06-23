@@ -13,6 +13,8 @@
     <th>ID</th>
     <th>이름</th>
     <th>비밀번호</th>
+    <th>생성일</th>
+    <th>수정일</th>
   </tr>
   </thead>
   <tbody>
@@ -20,6 +22,8 @@
     <td th:text="${user.id}"></td>
     <td th:text="${user.name}"></td>
     <td th:text="${user.password}"></td>
+    <td th:text="${user.createdAt}"></td>
+    <td th:text="${user.modifiedAt}"></td>
   </tr>
   </tbody>
 </table>

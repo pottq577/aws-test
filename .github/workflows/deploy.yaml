@@ -38,3 +38,36 @@ jobs:
           echo "IMAGE_NAME: $IMAGE_NAME"
           docker build -t $IMAGE_NAME:latest .
           docker push $IMAGE_NAME:latest
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Download current task definition
+        run: |
+          aws ecs describe-task-definition --task-definition sparta-tigers-task \
+          --query "taskDefinition" > task-definition.json
+
+      - name: Replace image URI in task definition
+        run: |
+          export IMAGE_URI=${{ secrets.DOCKER_USERNAME }}/aws-test:latest
+          cat task-definition.json \
+          | jq '.containerDefinitions[0].image = env.IMAGE_URI' \
+          | jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' \
+          > new-task-definition.json
+
+      - name: Register new task definition
+        run: |
+          aws ecs register-task-definition --cli-input-json file://new-task-definition.json
+
+      - name: Update ECS service with new task definition
+        run: |
+          NEW_REVISION=$(aws ecs describe-task-definition --task-definition sparta-tigers-task \
+            --query "taskDefinition.revision" --output test)
+          aws ecs update-service \
+            --cluster sparta-tigers-cluster \
+            --service sparta-tigers-service \
+            --task-definition sparta-tigers-task:$NEW_REVISION

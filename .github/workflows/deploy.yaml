@@ -63,16 +63,10 @@ jobs:
           | jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' \
           > new-task-definition.json
 
-      - name: Register new task definition
-        run: |
-          aws ecs register-task-definition --cli-input-json file://new-task-definition.json
-
-      - name: Update ECS service with new task definition
-        run: |
-          NEW_REVISION=$(aws ecs describe-task-definition --task-definition sparta-tigers-task \
-            --query "taskDefinition.revision" --output text)
-          aws ecs update-service \
-            --cluster sparta-tigers-cluster \
-            --service sparta-tigers-task-service \
-            --task-definition sparta-tigers-task:$NEW_REVISION \
-            --force-new-deployment
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: new-task-definition.json
+          service: sparta-tigers-task-service
+          cluster: sparta-tigers-cluster
+          wait-for-service-stability: true

@@ -71,4 +71,3 @@ jobs:
             --cluster sparta-tigers-cluster \
             --service sparta-tigers-task-service \
             --task-definition sparta-tigers-task:$NEW_REVISION
-            --force-new-deployment

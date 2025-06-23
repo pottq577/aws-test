@@ -11,6 +11,7 @@ public class AwsTestApplication {
         ConfigurableApplicationContext ctx = SpringApplication.run(AwsTestApplication.class, args);
         String dbUrl = ctx.getEnvironment().getProperty("spring.datasource.url");
         System.out.println("dbUrl = " + dbUrl);
+        System.out.println("배포 적용됨");
     }
 
 }

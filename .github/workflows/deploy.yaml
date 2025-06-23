@@ -62,7 +62,7 @@ jobs:
 
       - name: Inject secrets into task definition
         run: |
-          sed -i 's|__DB_URL__|${{ secrets.DATABASE_LOCAL_URL }}|g' ${{ steps.task-def.outputs.task-definition }}
+          sed -i 's|__DB_URL__|${{ secrets.DATABASE_LOCAL_URL_EC2 }}|g' ${{ steps.task-def.outputs.task-definition }}
           sed -i 's|__DB_USER__|${{ secrets.DATABASE_LOCAL_USERNAME }}|g' ${{ steps.task-def.outputs.task-definition }}
           sed -i 's|__DB_PASSWORD__|${{ secrets.DATABASE_LOCAL_PASSWORD }}|g' ${{ steps.task-def.outputs.task-definition }}
 

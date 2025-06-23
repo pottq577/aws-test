@@ -5,6 +5,15 @@ on:
     branches:
       - main
 
+env:
+  AWS_REGION: ap-northeast-2
+  ECS_CLUSTER: sparta-tigers-cluster
+  ECS_SERVICE: sparta-tigers-task-service
+  CONTAINER_NAME: sparta-tigers-container
+  IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/aws-test
+  ECS_TASK_TEMPLATE: aws/ecs/task-definition-template.json
+  ECS_TASK_GENERATED: aws/ecs/task-definition-generated.json
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-22.04
@@ -22,10 +31,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build --no-build-cache -x test # -x test: 테스트 하지 않음
 
-      - name: Check JAR contents (for templates)
-        run: |
-          unzip -l build/libs/aws-test-0.0.1-SNAPSHOT.jar | grep templates
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -35,11 +40,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push to Docker Hub
-        env:
-          IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/aws-test
+      - name: Build and push Docker image
         run: |
-          echo "IMAGE_NAME: $IMAGE_NAME"
           docker build -t $IMAGE_NAME:latest .
           docker push $IMAGE_NAME:latest
 
@@ -48,12 +50,26 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy to ECS
+      - name: Fill in the new image in ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_TEMPLATE }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ env.IMAGE_NAME }}:latest
+
+      - name: Inject secrets into task definition
+        run: |
+          sed -i 's|__DB_URL__|${{ secrets.DATABASE_LOCAL_URL }}|g' ${{ steps.task-def.outputs.task-definition }}
+          sed -i 's|__DB_USER__|${{ secrets.DATABASE_LOCAL_USERNAME }}|g' ${{ steps.task-def.outputs.task-definition }}
+          sed -i 's|__DB_PASSWORD__|${{ secrets.DATABASE_LOCAL_PASSWORD }}|g' ${{ steps.task-def.outputs.task-definition }}
+
+      - name: Deploy updated ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ecs-task-definition.json
-          service: sparta-tigers-task-service
-          cluster: sparta-tigers-cluster
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true

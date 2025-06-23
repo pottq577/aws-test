@@ -33,7 +33,7 @@ jobs:
 
       - name: Build and push to Docker Hub
         env:
-          IMAGE_NAME: ${{ secrets.DOCKER_USERNMAE }}/aws-test
+          IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/aws-test
         run: |
           echo "IMAGE_NAME: $IMAGE_NAME"
           docker build -t $IMAGE_NAME:latest .

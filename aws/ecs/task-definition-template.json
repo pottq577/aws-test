@@ -14,22 +14,22 @@
       "portMappings": [
         {
           "containerPort": 8080,
-          "hostPort": 8080,
+          "hostPort": 0,
           "protocol": "tcp"
         }
       ],
       "environment": [
         {
           "name": "database_local_url",
-          "value": "__DB_URL__"
+          "value": "${DB_URL}"
         },
         {
           "name": "database_local_username",
-          "value": "__DB_USER__"
+          "value": "${DB_USER}"
         },
         {
           "name": "database_local_password",
-          "value": "__DB_PASSWORD__"
+          "value": "${DB_PASSWORD}"
         }
       ]
     }

@@ -12,8 +12,6 @@ env:
   CONTAINER_NAME: sparta-tigers-container
   IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/aws-test
   IMAGE_TAG: latest
-  ECS_TASK_TEMPLATE: aws/ecs/task-definition-template.json
-  ECS_TASK_GENERATED: aws/ecs/task-definition-generated.json
 
 jobs:
   build-and-deploy:
@@ -53,26 +51,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Render ECS task definition with image
-        id: render-task
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_TEMPLATE }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-
-      - name: Inject secrets into rendered task definition
+      - name: Replace image URI in task definition
         run: |
-          cat ${{ steps.render-task.outputs.task-definition }} \
-          | sed "s/\${DB_URL}/${{ secrets.DATABASE_LOCAL_URL_EC2 }}/g" \
-          | sed "s/\${DB_USER}/${{ secrets.DATABASE_LOCAL_USERNAME }}/g" \
-          | sed "s/\${DB_PASSWORD}/${{ secrets.DATABASE_LOCAL_PASSWORD }}/g" \
-          > ${{ env.ECS_TASK_GENERATED }}
+          sed "s|DOCKER_IMAGE_URI_REPLACE_ME|${IMAGE_NAME}:${IMAGE_TAG}|g" aws/ecs/task-definition.json > aws/ecs/task-definition-final.json
 
-      - name: Deploy updated ECS task definition
+      - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ env.ECS_TASK_GENERATED }}
+          task-definition: aws/ecs/task-definition-final.json
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true

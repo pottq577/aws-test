@@ -57,7 +57,13 @@ jobs:
 
       - name: Replace image URI in task definition
         run: |
-          sed "s|DOCKER_IMAGE_URI_REPLACE_ME|${IMAGE_NAME}:${IMAGE_TAG}|g" aws/ecs/task-definition.json > aws/ecs/task-definition-final.json          
+          IMAGE_URI=${IMAGE_NAME}:${IMAGE_TAG}
+          sed "s|DOCKER_IMAGE_URI_REPLACE_ME|$IMAGE_URI|g" aws/ecs/task-definition.json > aws/ecs/task-definition-final.json
+          echo "== FINAL TASK DEFINITION =="
+          cat aws/ecs/task-definition-final.json          
+
+      - name: Debug task definition
+        run: cat aws/ecs/task-definition-final.json
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1

@@ -11,7 +11,7 @@ env:
   ECS_SERVICE: sparta-tigers-task-service
   CONTAINER_NAME: sparta-tigers-container
   IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/aws-test
-  IMAGE_TAG: latest
+#  IMAGE_TAG: latest
 
 jobs:
   build-and-deploy:
@@ -39,6 +39,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Extract Git SHA
+        id: git-info
+        run: echo "IMAGE_TAG=main-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         run: |
           docker build -t $IMAGE_NAME:$IMAGE_TAG .  
@@ -53,7 +57,7 @@ jobs:
 
       - name: Replace image URI in task definition
         run: |
-          sed "s|DOCKER_IMAGE_URI_REPLACE_ME|${IMAGE_NAME}:${IMAGE_TAG}|g" aws/ecs/task-definition.json > aws/ecs/task-definition-final.json
+          sed "s|DOCKER_IMAGE_URI_REPLACE_ME|${IMAGE_NAME}:${IMAGE_TAG}|g" aws/ecs/task-definition.json > aws/ecs/task-definition-final.json          
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1

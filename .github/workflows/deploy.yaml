@@ -63,10 +63,11 @@ jobs:
 
       - name: Inject secrets into rendered task definition
         run: |
-          export DB_URL=${{ secrets.DATABASE_LOCAL_URL_EC2 }}
-          export DB_USER=${{ secrets.DATABASE_LOCAL_USERNAME }}
-          export DB_PASSWORD=${{ secrets.DATABASE_LOCAL_PASSWORD }}
-          envsubst < ${{ steps.render-task.outputs.task-definition }} > ${{ env.ECS_TASK_GENERATED }}
+          envsubst < ${{ steps.render-task.outputs.task-definition }} \
+            | sed "s/\${DB_URL}/${{ secrets.DATABASE_LOCAL_URL_EC2 }}/g" \
+            | sed "s/\${DB_USER}/${{ secrets.DATABASE_LOCAL_USERNAME }}/g" \
+            | sed "s/\${DB_PASSWORD}/${{ secrets.DATABASE_LOCAL_PASSWORD }}/g" \
+            > ${{ env.ECS_TASK_GENERATED }}
 
       - name: Deploy updated ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1

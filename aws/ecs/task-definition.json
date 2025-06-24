@@ -22,15 +22,15 @@
       "environment": [
         {
           "name": "database_local_url",
-          "value": "${{ secrets.DATABASE_LOCAL_URL_EC2 }}"
+          "value": "${DB_URL}"
         },
         {
           "name": "database_local_username",
-          "value": "${{ secrets.DATABASE_LOCAL_USERNAME}}"
+          "value": "${DB_USER}"
         },
         {
           "name": "database_local_password",
-          "value": "${{ secrets.DATABASE_LOCAL_PASSWORD }}"
+          "value": "${DB_PASSWORD}"
         }
       ]
     }
